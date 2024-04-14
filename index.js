@@ -37,43 +37,81 @@ async function run() {
 
         // all get operations
 
-        app.get('/all/products', async(req, res)=>{
+        app.get('/all/products', async (req, res) => {
             const result = await productCollection.find().toArray()
             res.send(result)
         })
 
-        app.get('/single/product/:id', async(req, res)=>{
+        app.get('/single/product/:id', async (req, res) => {
             const id = req.params.id
-            const filter = {_id : new ObjectId(id)}
+            const filter = { _id: new ObjectId(id) }
             const result = await productCollection.findOne(filter)
             res.send(result)
         })
 
-        app.get('/get/product/:gender', async(req, res)=>{
+        app.get('/get/product/:gender', async (req, res) => {
             const gender = req.params.gender
-            const filter = {gender : gender}
+            const filter = { gender: gender }
+            const result = await productCollection.find(filter).toArray()
+            res.send(result)
+        })
+
+        app.get('/search/product/vi/:name', async (req, res) => {
+            const searchTitle = req.params.name
+            const filter = { productName: new RegExp(searchTitle, 'i') }
+            const result = await productCollection.find(filter).toArray()
+            res.send(result)
+        })
+
+        app.get('/search/product/:category', async (req, res) => {
+            const searchCategory = req.params.category
+            const filter = { ProductCategory: new RegExp(searchCategory, 'i') }
+            const result = await productCollection.find(filter).toArray()
+            res.send(result)
+        })
+
+        app.get('/search/vi/price', async (req, res) => {
+            const minPrice = req.query.minPrice
+            const maxPrice = req.query.maxPrice
+            const filter = {
+                discountPrice: {
+                    $gt: minPrice,
+                    $lt: maxPrice
+                }
+            }
+            const result = await productCollection.find(filter).toArray()
+            res.send(result)
+        })
+
+        app.get('/product/details/:id', async (req, res) => {
+            const id = req.params.id
+            const filter = { _id: new ObjectId(id) }
+            const result = await productCollection.findOne(filter)
+            res.send(result)
+        })
+        app.get('/product/category/:category', async (req, res) => {
+            const category = req.params.category
+            const filter = { ProductCategory: category }
             const result = await productCollection.find(filter).toArray()
             res.send(result)
         })
 
         // all post operations
 
-        app.post('/add/new/product', async(req, res)=>{
+        app.post('/add/new/product', async (req, res) => {
             const productData = req.body
             const result = await productCollection.insertOne(productData)
             res.send(result)
         })
 
         // all put operations
-        app.put('/update/product/:id', async(req, res)=>{
 
-        })
 
 
         // all delete operations
-        app.delete('/delete/product/:id', async(req, res)=>{
+        app.delete('/delete/product/:id', async (req, res) => {
             const id = req.params.id
-            const filter = {_id :new ObjectId(id)}
+            const filter = { _id: new ObjectId(id) }
             const result = productCollection.deleteOne(filter)
             res.send(result)
         })
