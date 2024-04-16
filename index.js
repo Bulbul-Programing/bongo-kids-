@@ -96,6 +96,13 @@ async function run() {
             res.send(result)
         })
 
+        app.post('/get/cartItem/products', async(req, res)=>{
+            const productID = req.body
+            const filter = { _id: { '$in': productID.map(id => new ObjectId(id)) } }
+            const result = await productCollection.find(filter).toArray()
+            res.send(result)
+        })
+
         // all post operations
 
         app.post('/add/new/product', async (req, res) => {
