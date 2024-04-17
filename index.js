@@ -34,6 +34,7 @@ async function run() {
         // await client.connect();
         // Send a ping to confirm a successful connection
         const productCollection = client.db('bongoKids').collection('products')
+        const ordersCollection = client.db('bongoKids').collection('orders')
 
         // all get operations
 
@@ -96,10 +97,22 @@ async function run() {
             res.send(result)
         })
 
-        app.post('/get/cartItem/products', async(req, res)=>{
+        app.post('/get/cartItem/products', async (req, res) => {
             const productID = req.body
             const filter = { _id: { '$in': productID.map(id => new ObjectId(id)) } }
             const result = await productCollection.find(filter).toArray()
+            res.send(result)
+        })
+
+        app.get('/get/all/order', async (req, res) => {
+            const result = await ordersCollection.find().sort({ date: -1, status: -1 }).toArray()
+            res.send(result)
+        })
+
+        app.get('/get/single/order/:id', async(req, res)=>{
+            const id = req.params.id
+            const filter = {_id : new ObjectId(id)}
+            const result = await ordersCollection.findOne(filter)
             res.send(result)
         })
 
@@ -111,8 +124,40 @@ async function run() {
             res.send(result)
         })
 
-        // all put operations
+        app.post('/add/new/order', async (req, res) => {
+            const orderData = req.body
+            const result = await ordersCollection.insertOne(orderData)
+            res.send(result)
+        })
 
+        // all put operations
+        app.put('/update/order/status/:id', async (req, res) => {
+            const { status } = req.body
+            const id = req.params.id
+            const filter = { _id: new ObjectId(id) }
+            const option = { upsert: true }
+            const updateDoc = {
+                $set: {
+                    status: `${status}`
+                }
+            }
+            const result = await ordersCollection.updateOne(filter, updateDoc, option)
+            res.send(result)
+        })
+
+        app.put('/update/product/condition/:id', async (req, res) => {
+            const id = req.params.id
+            const productCondition = req.body
+            const filter = { _id: new ObjectId(id) }
+            const option = { upsert: true }
+            const updateDoc = {
+                $set: {
+                    condition: productCondition.condition
+                }
+            }
+            const result = await productCollection.updateOne(filter, updateDoc, option)
+            res.send(result)
+        })
 
 
         // all delete operations
@@ -120,6 +165,13 @@ async function run() {
             const id = req.params.id
             const filter = { _id: new ObjectId(id) }
             const result = productCollection.deleteOne(filter)
+            res.send(result)
+        })
+
+        app.delete('/remove/order/:id', async(req, res)=>{
+            const id = req.params.id
+            const filter = {_id : new ObjectId(id)}
+            const result = await ordersCollection.deleteOne(filter)
             res.send(result)
         })
 
