@@ -35,6 +35,7 @@ async function run() {
         // Send a ping to confirm a successful connection
         const productCollection = client.db('bongoKids').collection('products')
         const ordersCollection = client.db('bongoKids').collection('orders')
+        const adminCollection = client.db('bongoKids').collection('admin')
 
         // all get operations
 
@@ -109,10 +110,22 @@ async function run() {
             res.send(result)
         })
 
-        app.get('/get/single/order/:id', async(req, res)=>{
+        app.get('/get/single/order/:id', async (req, res) => {
             const id = req.params.id
-            const filter = {_id : new ObjectId(id)}
+            const filter = { _id: new ObjectId(id) }
             const result = await ordersCollection.findOne(filter)
+            res.send(result)
+        })
+
+        app.get('/get/all/admin', async (req, res) => {
+            const result = await adminCollection.find().toArray()
+            res.send(result)
+        })
+
+        app.get(`/get/isAdmin/:email`, async (req, res) => {
+            const email = req.params.email
+            const filter = { email: email }
+            const result = await adminCollection.findOne(filter)
             res.send(result)
         })
 
@@ -128,6 +141,19 @@ async function run() {
             const orderData = req.body
             const result = await ordersCollection.insertOne(orderData)
             res.send(result)
+        })
+
+        app.post('/add/admin', async (req, res) => {
+            const adminData = req.body
+            const filter = { email: adminData.email }
+            const isExisted = await adminCollection.findOne(filter)
+            if (!isExisted) {
+                const result = await adminCollection.insertOne(adminData)
+                res.send(result)
+            }
+            else {
+                res.send({ massage: 'already admin' })
+            }
         })
 
         // all put operations
@@ -168,10 +194,17 @@ async function run() {
             res.send(result)
         })
 
-        app.delete('/remove/order/:id', async(req, res)=>{
+        app.delete('/remove/order/:id', async (req, res) => {
             const id = req.params.id
-            const filter = {_id : new ObjectId(id)}
+            const filter = { _id: new ObjectId(id) }
             const result = await ordersCollection.deleteOne(filter)
+            res.send(result)
+        })
+
+        app.delete('/delete/admin/:id', async (req, res) => {
+            const id = req.params.id
+            const filter = { _id: new ObjectId(id) }
+            const result = await adminCollection.deleteOne(filter)
             res.send(result)
         })
 
