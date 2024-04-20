@@ -5,7 +5,7 @@ const app = express()
 const port = process.env.PORT || 5000
 
 app.use(cors({
-    origin: ['http://localhost:5174', 'http://localhost:5173',],
+    origin: ['https://bongo-kids.web.app', 'https://bongo-kids.firebaseapp.com'],
     credentials: true,
     optionsSuccessStatus: 200,
     methods: ['GET', 'POST', 'PUT', 'DELETE']
@@ -40,7 +40,7 @@ async function run() {
         // all get operations
 
         app.get('/all/products', async (req, res) => {
-            const result = await productCollection.find().toArray()
+            const result = await productCollection.find().sort({ date: -1}).toArray()
             res.send(result)
         })
 
@@ -101,7 +101,7 @@ async function run() {
         app.post('/get/cartItem/products', async (req, res) => {
             const productID = req.body
             const filter = { _id: { '$in': productID.map(id => new ObjectId(id)) } }
-            const result = await productCollection.find(filter).toArray()
+            const result = await productCollection.find(filter).sort({ date: -1}).toArray()
             res.send(result)
         })
 
@@ -118,7 +118,7 @@ async function run() {
         })
 
         app.get('/get/all/admin', async (req, res) => {
-            const result = await adminCollection.find().toArray()
+            const result = await adminCollection.find().sort({ date: -1 }).toArray()
             res.send(result)
         })
 
